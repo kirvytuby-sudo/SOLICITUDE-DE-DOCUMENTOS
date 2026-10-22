@@ -16,7 +16,7 @@
 :root{
   --bg:#EEF5FC; --surface:#FFFFFF; --sunken:#E2EEF9; --ink:#10233A; --muted:#536D88; --line:#CCDFF0;
   --accent:#2A78C2; --accent-ink:#FFFFFF; --accent-soft:#DBEBFA;
-  --warn:#9A5B00; --warn-soft:#FBEED6; --bad:#B3261E; --bad-soft:#FBE3E0;
+  --warn:#9A5B00; --warn-soft:#FBEED6; --bad:#B3261E; --bad-soft:#FBE3E0; --ok:#1C7C50; --ok-soft:#DDF2E6;
   --bubble:#D3E8FB; --chat:#E5F0FA;
   --f-display:"Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
   --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
@@ -26,12 +26,12 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0D1724; --surface:#132233; --sunken:#1A2C40; --ink:#E2EDF8; --muted:#8FA8C0; --line:#253A50;
   --accent:#6BB4F0; --accent-ink:#06121F; --accent-soft:#16324D;
-  --warn:#E6A94B; --warn-soft:#3A2A10; --bad:#F08A80; --bad-soft:#3D1A17;
+  --warn:#E6A94B; --warn-soft:#3A2A10; --bad:#F08A80; --bad-soft:#3D1A17; --ok:#62C995; --ok-soft:#163A29;
   --bubble:#1B3A57; --chat:#0F1C2B; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0D1724; --surface:#132233; --sunken:#1A2C40; --ink:#E2EDF8; --muted:#8FA8C0; --line:#253A50;
   --accent:#6BB4F0; --accent-ink:#06121F; --accent-soft:#16324D;
-  --warn:#E6A94B; --warn-soft:#3A2A10; --bad:#F08A80; --bad-soft:#3D1A17;
+  --warn:#E6A94B; --warn-soft:#3A2A10; --bad:#F08A80; --bad-soft:#3D1A17; --ok:#62C995; --ok-soft:#163A29;
   --bubble:#1B3A57; --chat:#0F1C2B; color-scheme:dark}
 
 *{box-sizing:border-box}
@@ -63,7 +63,7 @@ nav.tabs .count{font-family:var(--f-mono);font-size:.75rem;background:var(--sunk
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .row > .field{flex:1 1 180px}
-input[type=text],input[type=tel],input[type=date],input[type=month],input[type=search],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
+input[type=text],input[type=number],input[type=tel],input[type=date],input[type=month],input[type=search],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
 textarea{resize:vertical;min-height:120px;line-height:1.45}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn{font:600 .9rem var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;white-space:nowrap}
@@ -147,6 +147,39 @@ td.act{white-space:nowrap;text-align:right}
 .tpl{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .ph{font-family:var(--f-mono);font-size:.78rem;background:var(--sunken);border-radius:4px;padding:1px 5px}
 
+/* calendario */
+.alertbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--bad-soft);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.9rem}
+.alertbar b{color:var(--bad)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding:4px 0;font-weight:600}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:8px;min-height:60px;padding:5px 6px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;font:inherit;color:var(--ink);min-width:0;overflow:hidden}
+.day:hover{background:var(--sunken)}
+.day.out{opacity:.4}
+.day.hoy{border-color:var(--accent)}
+.day.sel{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.day .n{font-family:var(--f-mono);font-size:.8rem;font-variant-numeric:tabular-nums}
+.day.hoy .n{color:var(--accent);font-weight:700}
+.ddots{display:flex;flex-wrap:wrap;gap:3px}
+.ddots i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.dlabels{display:none;flex-direction:column;gap:2px;min-width:0}
+.dlabels span{font-size:.72rem;line-height:1.3;border-radius:4px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--s);color:var(--c);font-weight:500}
+@media (min-width:860px){.day{min-height:92px}.ddots{display:none}.dlabels{display:flex}}
+.ev-programado{--c:var(--accent);--s:var(--accent-soft)}
+.ev-atrasado{--c:var(--bad);--s:var(--bad-soft)}
+.ev-cumplido{--c:var(--muted);--s:var(--sunken)}
+.ev-enviado{--c:var(--muted);--s:var(--sunken)}
+.ev-limite{--c:var(--warn);--s:var(--warn-soft)}
+.ev-recibido{--c:var(--ok);--s:var(--ok-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.evrow{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.evrow:last-child{border-bottom:0}
+.evrow > i{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:6px;flex:none}
+.evrow b{color:var(--c)}
+.fechas{display:flex;flex-wrap:wrap;gap:8px}
+.fechas .field{flex:1 1 130px}
+.fechas input{padding:6px 8px;font-size:.85rem}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;font-weight:500;z-index:20;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:no-preference){.toast{animation:up .18s ease-out}@keyframes up{from{opacity:0;transform:translate(-50%,6px)}}}
 /* pantallas de acceso */
@@ -201,6 +234,7 @@ td.act{white-space:nowrap;text-align:right}
     <div class="userbox"><span class="mode" id="mode"><span class="dot"></span><span>Conectando…</span></span>
       <button class="btn sm ghost" id="logout" hidden>Salir</button></div>
   </header>
+  <div id="alerta"></div>
   <nav class="tabs" role="tablist" id="tabs"></nav>
   <main id="view"></main>
 </div>
@@ -261,11 +295,13 @@ const names = {};
 function resolveNames(){}
 function quien(id){ if(!id) return ''; if(id===myId) return 'ti'; const u=names[id]; return (u&&(u.remitente||u.email))||'otro usuario'; }
 function firma(){ return perfil.remitente || state.ajustes.remitente || 'nuestro equipo'; }
-const state = {clientes:[], plantillas:[], solicitudes:[], ajustes:{remitente:'', catalogo:DEF_DOCS.slice()}};
+const state = {clientes:[], plantillas:[], solicitudes:[], programas:[], ajustes:{remitente:'', catalogo:DEF_DOCS.slice()}};
 const ui = {
   tab:'enviar', sel:new Set(), tpl:'tpl-inicial',
   docs:new Set(DEF_DOCS.slice(0,4)), fecha:plusDays(7), periodo:prevMonth(), busq:'', prev:null,
-  registrar:true, opened:{}, filtro:'abiertas', fperiodo:'', editCli:null, confirm:null
+  registrar:true, opened:{}, filtro:'abiertas', fperiodo:'', editCli:null, confirm:null,
+  calYm:ymd(new Date()).slice(0,7), calDay:ymd(new Date()), pfOpen:false,
+  pf:{tipo:'mensual', dia:1, fecha:plusDays(1), periodo:prevMonth(), todos:true, sel:new Set(), tpl:'tpl-inicial', docs:new Set(DEF_DOCS.slice(0,4)), dias:7}
 };
 
 /* ---------- utilidades ---------- */
@@ -333,7 +369,7 @@ function estado(s){
 }
 
 /* ---------- almacenamiento ---------- */
-function loadLocal(){ try{ const j=JSON.parse(localStorage.getItem(LS_KEY)||'null'); if(j){ ['clientes','plantillas','solicitudes'].forEach(k=>state[k]=j[k]||[]); if(j.ajustes) state.ajustes={...state.ajustes,...j.ajustes}; } }catch(e){} }
+function loadLocal(){ try{ const j=JSON.parse(localStorage.getItem(LS_KEY)||'null'); if(j){ ['clientes','plantillas','solicitudes','programas'].forEach(k=>state[k]=j[k]||[]); if(j.ajustes) state.ajustes={...state.ajustes,...j.ajustes}; } }catch(e){} }
 function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
 function sortAll(){
   state.clientes.sort((a,b)=>(a.empresa||a.contacto||'').localeCompare(b.empresa||b.contacto||'','es'));
@@ -403,6 +439,8 @@ function subscribe(){
       state[col]=s.docs.map(x=>({id:x.id,...x.data()})); sortAll(); render();
     }, fail));
   });
+  unsubs.push(db.doc('config/programacion').onSnapshot(s=>{ state.programas = s.exists ? (s.data().items||[]) : []; render(); }, fail));
+  setTimeout(notifyIfNeeded, 6000);
   unsubs.push(db.doc('config/ajustes').onSnapshot(s=>{
     state.ajustes = s.exists ? {remitente:'',catalogo:DEF_DOCS.slice(),...s.data()} : {remitente:'',catalogo:DEF_DOCS.slice()};
     render();
@@ -444,18 +482,171 @@ document.getElementById('setupForm').addEventListener('submit',e=>{
 });
 document.getElementById('localBtn').addEventListener('click',startLocal);
 
+/* ---------- calendario y envíos programados ---------- */
+function addDaysStr(s,n){ const [y,m,d]=s.split('-').map(Number); return ymd(new Date(y,m-1,d+n)); }
+function periodoAnterior(f){ const [y,m]=f.split('-').map(Number); const d=new Date(y,m-2,1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function ocurrencias(p, desde, hasta){
+  const out=[]; if(p.pausado) return out;
+  const inicio=p.desde||'';
+  if(p.tipo==='unica'){ if(p.fecha && p.fecha>=desde && p.fecha<=hasta && p.fecha>=inicio) out.push({fecha:p.fecha, periodo:p.periodo||periodoAnterior(p.fecha)}); return out; }
+  let [y,m]=desde.split('-').map(Number); m--;
+  const [hy,hm]=hasta.split('-').map(Number);
+  while(y<hy || (y===hy && m<=hm-1)){
+    const last=new Date(y,m+1,0).getDate(); const f=ymd(new Date(y,m,Math.min(p.dia||1,last)));
+    if(f>=desde && f<=hasta && f>=inicio) out.push({fecha:f, periodo:periodoAnterior(f)});
+    m++; if(m>11){m=0;y++;}
+  }
+  return out;
+}
+function clientesDe(p){ return p.todos ? state.clientes.map(c=>c.id) : (p.clientes||[]).filter(id=>state.clientes.some(c=>c.id===id)); }
+function enviado(cid, periodo){ return state.solicitudes.some(s=>s.clienteId===cid && s.periodo===periodo); }
+function pendientesEnvio(){
+  const hoy=today(), desde=addDaysStr(hoy,-62), res=[];
+  (state.programas||[]).forEach(p=>ocurrencias(p,desde,hoy).forEach(o=>{
+    const faltan=clientesDe(p).filter(cid=>!enviado(cid,o.periodo));
+    if(faltan.length) res.push({p,o,faltan});
+  }));
+  return res.sort((a,b)=>a.o.fecha.localeCompare(b.o.fecha));
+}
+function nomCli(id){ const c=state.clientes.find(x=>x.id===id); return c?(c.empresa||c.contacto):'Cliente'; }
+function lista(ids){ const n=ids.map(nomCli); return n.length>3 ? n.slice(0,3).join(', ')+` y ${n.length-3} más` : n.join(', '); }
+function fechaEnvioDe(s){ return s.fechaEnvio || (s.creado ? ymd(new Date(s.creado)) : ''); }
+function eventosMes(ym){
+  const [y,m]=ym.split('-').map(Number);
+  const desde=ym+'-01', hasta=ymd(new Date(y,m,0)), hoy=today(), ev={};
+  const add=(f,e)=>{ (ev[f]=ev[f]||[]).push(e); };
+  (state.programas||[]).forEach(p=>ocurrencias(p,desde,hasta).forEach(o=>{
+    const cl=clientesDe(p), faltan=cl.filter(cid=>!enviado(cid,o.periodo));
+    add(o.fecha,{tipo: faltan.length ? (o.fecha<=hoy?'atrasado':'programado') : 'cumplido', p, o, faltan, total:cl.length});
+  }));
+  state.solicitudes.forEach(s=>{
+    const nom=s.clienteId?nomCli(s.clienteId):(s.empresa||s.contacto||'Cliente');
+    const fe=fechaEnvioDe(s);
+    if(fe.startsWith(ym)) add(fe,{tipo:'enviado',s,nom});
+    if(s.fechaLimite && s.fechaLimite.startsWith(ym) && estado(s)!=='completa') add(s.fechaLimite,{tipo:'limite',s,nom});
+    if(s.fechaRecepcion && s.fechaRecepcion.startsWith(ym)) add(s.fechaRecepcion,{tipo:'recibido',s,nom});
+  });
+  return ev;
+}
+const EV_TXT={programado:'Enviar solicitud',atrasado:'Sin enviar',cumplido:'Solicitud enviada',enviado:'Enviado',limite:'Fecha límite',recibido:'Recibido'};
+function evLabel(e){
+  if(e.tipo==='programado'||e.tipo==='atrasado') return `${EV_TXT[e.tipo]} · ${e.faltan.length} cliente${e.faltan.length===1?'':'s'}`;
+  if(e.tipo==='cumplido') return `${EV_TXT.cumplido} · ${e.total}`;
+  return `${EV_TXT[e.tipo]} · ${e.nom}`;
+}
+function savePrograms(items){
+  if(db){ db.doc('config/programacion').set({items}).catch(handleErr); return; }
+  state.programas=items; saveLocal(); render();
+}
+function puedeNotificar(){ return typeof FIREBASE_CONFIG!=='undefined' && 'Notification' in window; }
+function notifyIfNeeded(){
+  try{
+    if(!puedeNotificar() || Notification.permission!=='granted') return;
+    const a=pendientesEnvio(); if(!a.length) return;
+    const k='aviso-sin-enviar-'+today(); if(localStorage.getItem(k)) return;
+    const n=a.reduce((t,x)=>t+x.faltan.length,0);
+    new Notification('Solicitudes sin enviar', {body:`${n} cliente${n===1?'':'s'} con envío programado pendiente. Abre la app para enviarlas.`});
+    localStorage.setItem(k,'1');
+  }catch(e){}
+}
+function renderAlert(){
+  const el=document.getElementById('alerta'); if(!el) return;
+  const a=pendientesEnvio(), n=a.reduce((t,x)=>t+x.faltan.length,0);
+  el.innerHTML = a.length && ui.tab!=='calendario'
+    ? `<div class="alertbar"><span><b>Solicitudes sin enviar:</b> ${n} cliente${n===1?'':'s'} con envío programado pendiente.</span><button class="btn sm" data-act="tab" data-k="calendario">Ver en Calendario</button></div>` : '';
+}
+function progDesc(p){
+  const cuando = p.tipo==='unica' ? `Una vez, el ${fmtFecha(p.fecha)} · periodo ${fmtPeriodo(p.periodo)}` : `Cada mes, el día ${p.dia} · pide el mes anterior`;
+  return {cuando, quien: p.todos ? 'Todos los clientes' : (lista(clientesDe(p))||'Sin clientes')};
+}
+
+function viewCal(){
+  const alerts=pendientesEnvio();
+  const [y,m]=ui.calYm.split('-').map(Number);
+  const ev=eventosMes(ui.calYm);
+  const off=(new Date(y,m-1,1).getDay()+6)%7, dim=new Date(y,m,0).getDate();
+  const total=Math.ceil((off+dim)/7)*7, hoy=today();
+  let cells='';
+  for(let i=0;i<total;i++){
+    const d=new Date(y,m-1,1-off+i), f=ymd(d), fuera=d.getMonth()!==m-1;
+    const es=fuera?[]:(ev[f]||[]);
+    cells+=`<button class="day ${fuera?'out':''} ${f===hoy?'hoy':''} ${f===ui.calDay?'sel':''}" data-act="day" data-f="${f}" aria-label="${esc(fmtFecha(f))}${es.length?', '+es.length+' eventos':''}">
+      <span class="n">${d.getDate()}</span>
+      <span class="ddots">${es.slice(0,5).map(e=>`<i class="ev-${e.tipo}"></i>`).join('')}</span>
+      <span class="dlabels">${es.slice(0,3).map(e=>`<span class="ev-${e.tipo}">${esc(evLabel(e))}</span>`).join('')}${es.length>3?`<span class="ev-cumplido">+${es.length-3} más</span>`:''}</span></button>`;
+  }
+  const evDia=(ui.calDay.startsWith(ui.calYm)?ev:eventosMes(ui.calDay.slice(0,7)))[ui.calDay]||[];
+  const detalle = evDia.length ? evDia.map(e=>{
+    if(e.tipo==='programado'||e.tipo==='atrasado') return `<div class="evrow ev-${e.tipo}"><i></i><div style="flex:1;min-width:0"><b>${EV_TXT[e.tipo]}</b> · ${esc(tplById(e.p.plantilla).nombre)} de ${esc(fmtPeriodo(e.o.periodo))}<div class="meta">Faltan: ${esc(lista(e.faltan))}</div></div><button class="btn sm ${e.tipo==='atrasado'?'pri':''}" data-act="sendnow" data-pid="${e.p.id}" data-periodo="${e.o.periodo}">Enviar ahora</button></div>`;
+    if(e.tipo==='cumplido') return `<div class="evrow ev-cumplido"><i></i><div style="flex:1"><b>Solicitud enviada</b> · ${esc(fmtPeriodo(e.o.periodo))} a ${e.total} cliente${e.total===1?'':'s'}</div></div>`;
+    return `<div class="evrow ev-${e.tipo}"><i></i><div style="flex:1;min-width:0"><b>${EV_TXT[e.tipo]}</b> · ${esc(e.nom)}${e.s.periodo?`<div class="meta">${esc(fmtPeriodo(e.s.periodo))}</div>`:''}</div><button class="btn sm ghost" data-act="verseg" data-periodo="${esc(e.s.periodo||'')}">Ver</button></div>`;
+  }).join('') : '<p class="note">Nada programado este día.</p>';
+
+  const pf=ui.pf, tpls=plantillas(), cat=state.ajustes.catalogo;
+  const progs=state.programas||[];
+  return `<div style="display:flex;flex-direction:column;gap:18px">
+  ${alerts.length?`<section class="panel" style="border-color:var(--bad)">
+    <h2>Solicitudes sin enviar</h2>
+    <p class="note">Ya pasó la fecha programada y estos clientes no tienen solicitud registrada para ese periodo.</p>
+    ${alerts.map(a=>`<div class="evrow ev-atrasado"><i></i><div style="flex:1;min-width:0"><b>${esc(tplById(a.p.plantilla).nombre)} de ${esc(fmtPeriodo(a.o.periodo))}</b><div class="meta">Programado para el ${esc(fmtFecha(a.o.fecha))} · Faltan: ${esc(lista(a.faltan))}</div></div><button class="btn sm pri" data-act="sendnow" data-pid="${a.p.id}" data-periodo="${a.o.periodo}">Enviar ahora</button></div>`).join('')}
+    ${puedeNotificar() && Notification.permission==='default' ? '<div class="row"><button class="btn sm" data-act="notif">Avisarme en este equipo al abrir la app</button></div>' : ''}
+  </section>`:''}
+  <section class="panel">
+    <div class="row" style="justify-content:space-between">
+      <h2>${esc(fmtPeriodo(ui.calYm).replace(/^./,c=>c.toUpperCase()))}</h2>
+      <div class="row" style="gap:6px"><button class="btn sm ghost" data-act="calmov" data-d="-1" aria-label="Mes anterior">‹ Anterior</button><button class="btn sm" data-act="calhoy">Hoy</button><button class="btn sm ghost" data-act="calmov" data-d="1" aria-label="Mes siguiente">Siguiente ›</button></div>
+    </div>
+    <div class="cal">${['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`<span class="wd">${d}</span>`).join('')}${cells}</div>
+    <div class="legend">${['programado','atrasado','enviado','limite','recibido'].map(k=>`<span class="ev-${k}"><i></i>${k==='programado'?'Envío programado':k==='atrasado'?'Sin enviar':EV_TXT[k]}</span>`).join('')}</div>
+  </section>
+  <div class="grid2">
+    <section class="panel">
+      <h2>${esc(fmtFecha(ui.calDay).replace(/^./,c=>c.toUpperCase()))}</h2>
+      <div>${detalle}</div>
+    </section>
+    <section class="panel">
+      <div class="row" style="justify-content:space-between"><h2>Envíos programados</h2>${ui.pfOpen?'':'<button class="btn sm pri" data-act="pnew">+ Programar envío</button>'}</div>
+      ${ui.pfOpen?`<form data-form="prog" style="display:flex;flex-direction:column;gap:12px;border:1px solid var(--line);border-radius:8px;padding:14px">
+        <div class="row">
+          <div class="field"><span class="lbl">Frecuencia</span><select id="pf-tipo"><option value="mensual" ${pf.tipo==='mensual'?'selected':''}>Cada mes</option><option value="unica" ${pf.tipo==='unica'?'selected':''}>Una sola vez</option></select></div>
+          ${pf.tipo==='mensual'
+            ? `<div class="field" style="flex:0 1 140px"><span class="lbl">Día del mes</span><input type="number" min="1" max="31" id="pf-dia" value="${pf.dia}"></div>`
+            : `<div class="field"><span class="lbl">Fecha de envío</span><input type="date" id="pf-fecha" value="${esc(pf.fecha)}"></div><div class="field"><span class="lbl">Periodo</span><input type="month" id="pf-periodo" value="${esc(pf.periodo)}"></div>`}
+        </div>
+        <div class="row">
+          <div class="field"><span class="lbl">Plantilla</span><select id="pf-tpl">${tpls.map(t=>`<option value="${t.id}" ${t.id===pf.tpl?'selected':''}>${esc(t.nombre)}</option>`).join('')}</select></div>
+          <div class="field" style="flex:0 1 150px"><span class="lbl">Días para entregar</span><input type="number" min="1" max="60" id="pf-dias" value="${pf.dias}"></div>
+        </div>
+        <div class="field"><span class="lbl">Clientes</span>
+          <label class="row note" style="gap:8px;cursor:pointer"><input type="checkbox" id="pf-todos" ${pf.todos?'checked':''} style="accent-color:var(--accent)"> Todos los clientes, incluidos los que agregues después</label>
+          ${pf.todos?'':`<div class="clist" style="max-height:200px">${state.clientes.map(c=>`<label class="citem"><input type="checkbox" data-act="pcli" data-id="${c.id}" ${pf.sel.has(c.id)?'checked':''}><span class="who"><b>${esc(c.empresa||c.contacto)}</b></span></label>`).join('')||'<div class="empty">Primero agrega clientes.</div>'}</div>`}
+        </div>
+        <div class="field"><span class="lbl">Documentos · ${pf.docs.size}</span><div class="chips">${cat.map(d=>`<button type="button" class="chip" data-act="pdoc" data-d="${esc(d)}" aria-pressed="${pf.docs.has(d)}">${esc(d)}</button>`).join('')}</div></div>
+        <div class="row"><button class="btn pri" type="submit">Guardar programación</button><button class="btn ghost" type="button" data-act="pcancel">Cancelar</button></div>
+        <p class="note">Si llega la fecha y algún cliente no tiene solicitud registrada para ese periodo, la app te avisa arriba y en el Calendario.</p>
+      </form>`:''}
+      ${progs.length?`<div class="mlist">${progs.map(p=>{ const d=progDesc(p); return `<div class="mrow" style="align-items:flex-start">
+        <div style="flex:1 1 200px;min-width:0"><b>${esc(tplById(p.plantilla).nombre)}</b>${p.pausado?' <span class="tag w">En pausa</span>':''}
+          <div class="meta">${esc(d.cuando)}</div><div class="meta">${esc(d.quien)} · ${(p.docs||[]).length} documentos · ${p.dias||7} días para entregar</div></div>
+        ${ui.confirm==='p:'+p.id?`<span class="confirm">¿Eliminar? <button class="btn sm danger" data-act="pdel" data-id="${p.id}">Eliminar</button><button class="btn sm ghost" data-act="cancel">No</button></span>`
+          :`<button class="btn sm ghost" data-act="ppause" data-id="${p.id}">${p.pausado?'Reanudar':'Pausar'}</button><button class="btn sm ghost danger" data-act="paskdel" data-id="${p.id}">Eliminar</button>`}
+      </div>`; }).join('')}</div>`:(ui.pfOpen?'':'<div class="empty" style="padding:14px">Programa, por ejemplo, el cierre mensual para todos tus clientes el día 1 de cada mes.</div>')}
+    </section>
+  </div></div>`;
+}
+
 /* ---------- render ---------- */
 function renderTabs(){
   const pend = state.solicitudes.filter(s=>estado(s)!=='completa').length;
-  const tabs=[['enviar','Enviar',null],['seguimiento','Seguimiento',pend],['clientes','Clientes',state.clientes.length],['ajustes','Plantillas y ajustes',null]];
+  const tabs=[['enviar','Enviar',null],['seguimiento','Seguimiento',pend],['calendario','Calendario',pendientesEnvio().reduce((t,x)=>t+x.faltan.length,0)||null],['clientes','Clientes',state.clientes.length],['ajustes','Plantillas y ajustes',null]];
   document.getElementById('tabs').innerHTML = tabs.map(([k,t,n])=>
     `<button role="tab" data-act="tab" data-k="${k}" aria-selected="${ui.tab===k}">${t}${n!=null?`<span class="count">${n}</span>`:''}</button>`).join('');
 }
 function render(){
-  renderTabs();
+  renderTabs(); renderAlert();
   const v=document.getElementById('view');
   const keep = document.activeElement && document.activeElement.id;
-  v.innerHTML = ({enviar:viewEnviar, seguimiento:viewSeg, clientes:viewClientes, ajustes:viewAjustes})[ui.tab]();
+  v.innerHTML = ({enviar:viewEnviar, seguimiento:viewSeg, calendario:viewCal, clientes:viewClientes, ajustes:viewAjustes})[ui.tab]();
   if(keep){ const el=document.getElementById(keep); if(el && el.tagName!=='BUTTON'){ el.focus(); if(el.setSelectionRange && el.type!=='date' && el.value!=null) try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){} } }
 }
 
@@ -553,6 +744,10 @@ function viewSeg(){
         ${s.periodo?`<div class="lbl" style="margin:2px 0">${esc(fmtPeriodo(s.periodo))}</div>`:''}
         <div class="meta">Solicitado ${esc(fmtTS(s.creado))}${s.por?' por '+esc(quien(s.por)):''}${s.fechaLimite?` · límite ${esc(fmtFecha(s.fechaLimite,true))}`:''}${s.recordatorios?` · ${s.recordatorios} recordatorio${s.recordatorios>1?'s':''}`:''}</div></div>${tag}</header>
       <div><div class="meta" style="margin-bottom:4px"><span class="mono">${ok} de ${docs.length}</span> recibidos</div><div class="bar"><i style="width:${docs.length?Math.round(ok/docs.length*100):0}%"></i></div></div>
+      <div class="fechas">
+        <label class="field"><span class="lbl">Fecha de envío</span><input type="date" id="fe-${s.id}" data-act="fenv" data-id="${s.id}" value="${esc(fechaEnvioDe(s))}"></label>
+        <label class="field"><span class="lbl">Fecha de recepción</span><input type="date" id="fr-${s.id}" data-act="frec" data-id="${s.id}" value="${esc(s.fechaRecepcion||'')}"></label>
+      </div>
       ${respBlock(s)}
       <ul class="doclist">${docs.map((d,i)=>`<li><label><input type="checkbox" data-act="rec" data-id="${s.id}" data-i="${i}" ${d.recibido?'checked':''}><span class="${d.recibido?'done':''}">${esc(d.nombre)}</span></label></li>`).join('')}</ul>
       ${ui.confirm==='s:'+s.id?`<div class="confirm">¿Eliminar esta solicitud? <button class="btn sm danger" data-act="delsol" data-id="${s.id}">Eliminar</button><button class="btn sm ghost" data-act="cancel">Cancelar</button></div>`:''}
@@ -683,7 +878,7 @@ function registrarSolicitud(c){
   const id=uid('s');
   ui.opened[c.id]=id;
   put('solicitudes',id,{clienteId:c.id,empresa:c.empresa||'',contacto:c.contacto||'',telefono:c.telefono||'',correo:c.correo||'',
-    docs:[...ui.docs].map(n=>({nombre:n,recibido:false})),fechaLimite:ui.fecha||'',periodo:ui.periodo||'',plantilla:tplById(ui.tpl).nombre,creado:new Date().toISOString(),recordatorios:0,por:myId||''});
+    docs:[...ui.docs].map(n=>({nombre:n,recibido:false})),fechaLimite:ui.fecha||'',periodo:ui.periodo||'',plantilla:tplById(ui.tpl).nombre,creado:new Date().toISOString(),fechaEnvio:today(),recordatorios:0,por:myId||''});
 }
 function resetOpened(){ ui.opened={}; }
 async function copyText(t){
@@ -717,6 +912,21 @@ document.addEventListener('click', e=>{
     case 'mprinc': { const r=recepcion().map((x,i)=>({...x,principal:i===+t.dataset.i})); put('config','ajustes',{...state.ajustes,recepcion:r}); break; }
     case 'askmdel': ui.confirm='m:'+t.dataset.i; render(); break;
     case 'mdel': { ui.confirm=null; const r=recepcion().filter((_,i)=>i!==+t.dataset.i); put('config','ajustes',{...state.ajustes,recepcion:r}); break; }
+    case 'calmov': { const [cy,cm]=ui.calYm.split('-').map(Number); const d=new Date(cy,cm-1+(+t.dataset.d),1); ui.calYm=ymd(d).slice(0,7); ui.calDay=ui.calYm+'-01'; render(); break; }
+    case 'calhoy': ui.calYm=today().slice(0,7); ui.calDay=today(); render(); break;
+    case 'day': { const f=t.dataset.f; ui.calDay=f; if(!f.startsWith(ui.calYm)) ui.calYm=f.slice(0,7); render(); break; }
+    case 'sendnow': { const p=(state.programas||[]).find(x=>x.id===t.dataset.pid); if(!p) break; const per=t.dataset.periodo;
+      const falt=clientesDe(p).filter(cid=>!enviado(cid,per));
+      ui.sel=new Set(falt); ui.prev=falt[0]||null; ui.periodo=per; ui.tpl=p.plantilla; ui.docs=new Set(p.docs||[]); ui.fecha=addDaysStr(today(),p.dias||7);
+      resetOpened(); ui.tab='enviar'; render(); window.scrollTo({top:0}); toast('Listo para enviar a '+falt.length+' cliente'+(falt.length===1?'':'s')); break; }
+    case 'verseg': ui.tab='seguimiento'; ui.filtro='todas'; ui.fperiodo=t.dataset.periodo||''; render(); window.scrollTo({top:0}); break;
+    case 'pnew': ui.pfOpen=true; render(); break;
+    case 'pcancel': ui.pfOpen=false; render(); break;
+    case 'pdoc': { const d=t.dataset.d; ui.pf.docs.has(d)?ui.pf.docs.delete(d):ui.pf.docs.add(d); render(); break; }
+    case 'ppause': savePrograms((state.programas||[]).map(p=>p.id===id?{...p,pausado:!p.pausado}:p)); break;
+    case 'paskdel': ui.confirm='p:'+id; render(); break;
+    case 'pdel': ui.confirm=null; savePrograms((state.programas||[]).filter(p=>p.id!==id)); toast('Programación eliminada'); break;
+    case 'notif': try{ Notification.requestPermission().then(()=>{ render(); notifyIfNeeded(); }); }catch(_){} break;
     case 'askdelsol': ui.confirm='s:'+id; render(); break;
     case 'delsol': ui.confirm=null; del('solicitudes',id); toast('Solicitud eliminada'); break;
     case 'cancel': ui.confirm=null; render(); break;
@@ -735,12 +945,25 @@ document.addEventListener('click', e=>{
 
 document.addEventListener('change', e=>{
   const t=e.target;
+  if(t.dataset.act==='fenv'||t.dataset.act==='frec'){
+    const s=state.solicitudes.find(x=>x.id===t.dataset.id); if(!s) return;
+    put('solicitudes',s.id,{...strip(s),[t.dataset.act==='fenv'?'fechaEnvio':'fechaRecepcion']:t.value});
+    toast(t.dataset.act==='fenv'?'Fecha de envío guardada':'Fecha de recepción guardada'); return;
+  }
+  if(t.dataset.act==='pcli'){ t.checked?ui.pf.sel.add(t.dataset.id):ui.pf.sel.delete(t.dataset.id); return; }
+  if(t.id==='pf-tipo'){ ui.pf.tipo=t.value; render(); return; }
+  if(t.id==='pf-todos'){ ui.pf.todos=t.checked; render(); return; }
+  if(t.id==='pf-dia'){ ui.pf.dia=Math.min(31,Math.max(1,+t.value||1)); return; }
+  if(t.id==='pf-fecha'){ ui.pf.fecha=t.value; return; }
+  if(t.id==='pf-periodo'){ ui.pf.periodo=t.value; return; }
+  if(t.id==='pf-tpl'){ ui.pf.tpl=t.value; return; }
+  if(t.id==='pf-dias'){ ui.pf.dias=Math.max(1,+t.value||7); return; }
   if(t.dataset.act==='sel'){ t.checked?ui.sel.add(t.dataset.id):ui.sel.delete(t.dataset.id); render(); }
   else if(t.dataset.act==='registrar'){ ui.registrar=t.checked; }
   else if(t.dataset.act==='rec'){
     const s=state.solicitudes.find(x=>x.id===t.dataset.id); if(!s) return;
     const docs=(s.docs||[]).map((d,i)=>i===+t.dataset.i?{...d,recibido:t.checked}:d);
-    put('solicitudes',s.id,{...strip(s),docs});
+    put('solicitudes',s.id,{...strip(s),docs,...(docs.every(d=>d.recibido)&&!s.fechaRecepcion?{fechaRecepcion:today()}:{})});
     if(docs.every(d=>d.recibido)) toast('Expediente completo');
   }
   else if(t.id==='tplsel'){ ui.tpl=t.value; resetOpened(); render(); }
@@ -792,6 +1015,17 @@ document.addEventListener('submit', e=>{
     if(recepcion().some(x=>x.correo===m)){ toast('Ese correo ya está en la lista.'); return; }
     put('config','ajustes',{...state.ajustes,recepcion:[...recepcion(),{correo:m,principal:!recepcion().length}]});
     toast('Correo de recepción agregado');
+  }
+  else if(k==='prog'){
+    const pf=ui.pf;
+    if(!pf.todos && !pf.sel.size){ toast('Elige al menos un cliente.'); return; }
+    if(!pf.docs.size){ toast('Elige al menos un documento.'); return; }
+    if(pf.tipo==='unica' && !pf.fecha){ toast('Elige la fecha de envío.'); return; }
+    const hoy=today();
+    const item={id:uid('p'),tipo:pf.tipo,dia:pf.dia,fecha:pf.fecha,periodo:pf.periodo,todos:pf.todos,clientes:[...pf.sel],plantilla:pf.tpl,docs:[...pf.docs],dias:pf.dias,
+      desde: pf.tipo==='unica' && pf.fecha<hoy ? pf.fecha : hoy, pausado:false, creado:new Date().toISOString()};
+    ui.pfOpen=false; ui.pf={tipo:'mensual', dia:1, fecha:plusDays(1), periodo:prevMonth(), todos:true, sel:new Set(), tpl:'tpl-inicial', docs:new Set(DEF_DOCS.slice(0,4)), dias:7};
+    savePrograms([...(state.programas||[]),item]); toast('Envío programado');
   }
   else if(k==='remitente'){ put('config','ajustes',{...state.ajustes,remitente:v('remit')}); toast('Guardado'); }
   else if(k==='cat'){ const d=v('catnew'); if(d && !state.ajustes.catalogo.includes(d)){ put('config','ajustes',{...state.ajustes,catalogo:[...state.ajustes.catalogo,d]}); } }
