@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Solicitud de Documentos</title>
+<meta name="theme-color" content="#EEF5FC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Documentos">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232A78C2'/%3E%3Cpath d='M10 7h9l5 5v13H10z' fill='white'/%3E%3Cpath d='M19 7v5h5' fill='%23DBEBFA'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: herramienta de trabajo — barra de pestañas fija, en "Enviar" dos columnas (armar mensaje | vista previa tipo chat). */
+:root{
+  --bg:#EEF5FC; --surface:#FFFFFF; --sunken:#E2EEF9; --ink:#10233A; --muted:#536D88; --line:#CCDFF0;
+  --accent:#2A78C2; --accent-ink:#FFFFFF; --accent-soft:#DBEBFA;
+  --warn:#9A5B00; --warn-soft:#FBEED6; --bad:#B3261E; --bad-soft:#FBE3E0;
+  --bubble:#D3E8FB; --chat:#E5F0FA;
+  --f-display:"Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1724; --surface:#132233; --sunken:#1A2C40; --ink:#E2EDF8; --muted:#8FA8C0; --line:#253A50;
+  --accent:#6BB4F0; --accent-ink:#06121F; --accent-soft:#16324D;
+  --warn:#E6A94B; --warn-soft:#3A2A10; --bad:#F08A80; --bad-soft:#3D1A17;
+  --bubble:#1B3A57; --chat:#0F1C2B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1724; --surface:#132233; --sunken:#1A2C40; --ink:#E2EDF8; --muted:#8FA8C0; --line:#253A50;
+  --accent:#6BB4F0; --accent-ink:#06121F; --accent-soft:#16324D;
+  --warn:#E6A94B; --warn-soft:#3A2A10; --bad:#F08A80; --bad-soft:#3D1A17;
+  --bubble:#1B3A57; --chat:#0F1C2B; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:15px}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 80px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:1.65rem;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.92rem}
+.mode{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.ok{background:var(--accent)} .dot.w{background:var(--warn)}
+
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+nav.tabs button{font-family:var(--f-display);font-weight:600;font-size:.95rem;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:10px 14px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs .count{font-family:var(--f-mono);font-size:.75rem;background:var(--sunken);border-radius:20px;padding:1px 7px;margin-left:6px;color:var(--muted)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h2{font-family:var(--f-display);font-weight:600;font-size:1.05rem;margin:0;display:flex;align-items:center;gap:8px}
+.step{font-family:var(--f-mono);font-size:.75rem;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:1px 6px}
+.lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row > .field{flex:1 1 180px}
+input[type=text],input[type=tel],input[type=date],input[type=month],input[type=search],select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:120px;line-height:1.45}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:600 .9rem var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--sunken)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.sm{padding:5px 10px;font-size:.82rem}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);background:var(--sunken)}
+.btn.danger{color:var(--bad)}
+.btn[disabled],a.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.muted{color:var(--muted)} .mono{font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.note{font-size:.85rem;color:var(--muted);margin:0}
+
+/* lista de clientes seleccionable */
+.clist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;max-height:280px;overflow:auto}
+.citem{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.citem:last-child{border-bottom:0}
+.citem:hover{background:var(--sunken)}
+.citem input{width:17px;height:17px;accent-color:var(--accent);flex:none}
+.citem .who{flex:1;min-width:0}
+.citem .who b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.citem .who span{font-size:.82rem;color:var(--muted)}
+.empty{padding:22px;text-align:center;color:var(--muted);font-size:.9rem}
+
+/* documentos */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font:500 .85rem var(--f-body);text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:20px;padding:5px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.chip[aria-pressed="true"]::before{content:"✓";color:var(--accent);font-weight:700}
+.chip .x{color:var(--muted);font-weight:700;margin-left:2px}
+
+/* vista previa chat */
+.chat{background:var(--chat);border-radius:8px;padding:14px;display:flex;flex-direction:column;align-items:flex-end}
+.bubble{background:var(--bubble);border-radius:10px 2px 10px 10px;padding:10px 12px 6px;max-width:94%;white-space:pre-wrap;word-wrap:break-word;font-size:.92rem;line-height:1.45;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.bubble small{display:block;text-align:right;color:var(--muted);font-size:.7rem;margin-top:4px}
+.sendlist{display:flex;flex-direction:column;gap:8px}
+.sendrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.sendrow.on{border-color:var(--accent)}
+.sendrow .who{flex:1 1 160px;min-width:0}
+.sendrow .who b{display:block}
+.tag{font:600 .72rem var(--f-body);letter-spacing:.03em;border-radius:20px;padding:2px 8px;white-space:nowrap}
+.tag.ok{background:var(--accent-soft);color:var(--accent)}
+.tag.w{background:var(--warn-soft);color:var(--warn)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* seguimiento */
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.vencida{border-left:4px solid var(--bad)}
+.card.pendiente{border-left:4px solid var(--warn)}
+.card.completa{border-left:4px solid var(--accent)}
+.card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card h3{font-family:var(--f-display);font-size:1.02rem;margin:0;font-weight:600}
+.meta{font-size:.8rem;color:var(--muted)}
+.bar{height:6px;border-radius:4px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.doclist{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
+.doclist label{display:flex;gap:9px;align-items:flex-start;padding:4px 2px;cursor:pointer;font-size:.9rem}
+.doclist input{accent-color:var(--accent);width:16px;height:16px;margin-top:3px;flex:none}
+.doclist .done{color:var(--muted);text-decoration:line-through}
+.resp{display:flex;align-items:flex-start;gap:8px;background:var(--accent-soft);border-radius:8px;padding:8px 10px;font-size:.88rem}
+.resp b{color:var(--accent)}
+details > .row{margin-top:6px}
+.mlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px}
+.mrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:9px 12px;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow .addr{flex:1 1 180px;min-width:0;overflow-wrap:anywhere;font-weight:500}
+.card footer{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.confirm{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--bad-soft);border-radius:8px;padding:6px 10px;font-size:.85rem}
+
+/* clientes */
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.9rem}
+th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:9px 12px;background:var(--sunken)}
+td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+td.act{white-space:nowrap;text-align:right}
+.ex{font-size:.7rem;color:var(--warn);font-weight:600;margin-left:6px}
+
+.tpl{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ph{font-family:var(--f-mono);font-size:.78rem;background:var(--sunken);border-radius:4px;padding:1px 5px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;font-weight:500;z-index:20;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:up .18s ease-out}@keyframes up{from{opacity:0;transform:translate(-50%,6px)}}}
+/* pantallas de acceso */
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.gate .panel{width:100%;max-width:420px}
+.gate h1{font-size:1.45rem}
+.brand{display:flex;align-items:center;gap:10px}
+.brand i{width:34px;height:34px;border-radius:8px;background:var(--accent);display:grid;place-items:center;flex:none}
+.brand i::after{content:"";width:13px;height:16px;background:var(--surface);clip-path:polygon(0 0,65% 0,100% 30%,100% 100%,0 100%)}
+.err{color:var(--bad);font-size:.85rem;margin:0}
+.userbox{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- Configuración inicial (solo si falta la conexión con Firebase) -->
+<section class="gate" id="setup" hidden>
+  <div class="panel">
+    <div class="brand"><i></i><h1>Configurar la conexión</h1></div>
+    <p class="note">Falta conectar la app con tu proyecto de Firebase. Pega aquí la configuración que te da Firebase (el bloque <span class="ph">firebaseConfig</span>). Se guarda solo en este navegador, para probar. Para que funcione con todo tu equipo, pega la misma configuración dentro del archivo <b>index.html</b>, en la línea marcada <span class="ph">FIREBASE_CONFIG</span>.</p>
+    <form id="setupForm" style="display:flex;flex-direction:column;gap:10px">
+      <textarea id="cfgText" placeholder="const firebaseConfig = {&#10;  apiKey: &quot;…&quot;,&#10;  authDomain: &quot;…&quot;,&#10;  projectId: &quot;…&quot;,&#10;  …&#10;};"></textarea>
+      <p class="err" id="setupErr" hidden></p>
+      <div class="row"><button class="btn pri" type="submit">Guardar y conectar</button>
+      <button class="btn ghost" type="button" id="localBtn">Probar sin conexión</button></div>
+      <p class="note">“Probar sin conexión” guarda los datos solo en este navegador y no se comparten con nadie.</p>
+    </form>
+  </div>
+</section>
+
+<!-- Inicio de sesión -->
+<section class="gate" id="login" hidden>
+  <div class="panel">
+    <div class="brand"><i></i><h1>Solicitud de Documentos</h1></div>
+    <p class="note">Entra con el correo y la contraseña que te dio el administrador del despacho.</p>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:12px">
+      <div class="field"><span class="lbl">Correo</span><input type="text" inputmode="email" autocomplete="username" id="lgMail"></div>
+      <div class="field"><span class="lbl">Contraseña</span><input type="password" autocomplete="current-password" id="lgPass" style="font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%"></div>
+      <p class="err" id="lgErr" hidden></p>
+      <div class="row"><button class="btn pri" type="submit" id="lgBtn">Entrar</button>
+      <button class="btn ghost" type="button" id="lgReset">Olvidé mi contraseña</button></div>
+    </form>
+  </div>
+</section>
+
+<div class="wrap" id="app" hidden>
+  <header class="top">
+    <div>
+      <h1>Solicitud de Documentos</h1>
+      <p class="sub">Pide a tus clientes estados de cuenta, facturas y demás documentos del mes por WhatsApp o correo, y controla lo que ya llegó.</p>
+    </div>
+    <div class="userbox"><span class="mode" id="mode"><span class="dot"></span><span>Conectando…</span></span>
+      <button class="btn sm ghost" id="logout" hidden>Salir</button></div>
+  </header>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="view"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* =====================================================================
+   FIREBASE_CONFIG — pega aquí la configuración de tu proyecto Firebase.
+   Ejemplo:
+   const FIREBASE_CONFIG = {
+     apiKey: "AIza...", authDomain: "mi-despacho.firebaseapp.com",
+     projectId: "mi-despacho", storageBucket: "mi-despacho.appspot.com",
+     messagingSenderId: "123456", appId: "1:123456:web:abc"
+   };
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC2K2A4j66vsfHVBxLayzswmf-JucjNOtk",
+  authDomain: "solicitud-de-documentos-70d7a.firebaseapp.com",
+  projectId: "solicitud-de-documentos-70d7a",
+  storageBucket: "solicitud-de-documentos-70d7a.firebasestorage.app",
+  messagingSenderId: "591333402858",
+  appId: "1:591333402858:web:ef14779714a2e74fcacf93"
+};
+</script>
+<script>
+(() => {
+const LS_KEY = 'solicitud-docs-wa-v1';
+const DEF_DOCS = [
+  'Estados de cuenta bancarios (todas las cuentas)',
+  'Estados de cuenta de tarjetas de crédito',
+  'Facturas de ingresos emitidas (PDF y XML)',
+  'Facturas de gastos recibidas (PDF y XML)',
+  'Estados de cuenta de inversiones',
+  'Complementos de pago recibidos',
+  'Recibos de nómina y lista de raya',
+  'Comprobantes de gastos sin factura',
+  'Estados de cuenta de créditos (automotriz, hipotecario, préstamos)',
+  'Constancias de retenciones',
+  'Constancia de Situación Fiscal actualizada'
+];
+const DEF_TPL = [
+  {id:'tpl-inicial', nombre:'Cierre mensual', base:true, asunto:'Documentos para la contabilidad de {periodo} – {empresa}', texto:
+'Hola {contacto}, buen día. Le escribe {remitente}.\n\nPara preparar la contabilidad y la declaración de {periodo} de {empresa}, le pido por favor los siguientes documentos:\n\n{documentos}\n\nNecesito recibirlos a más tardar el {fecha_limite} para presentar en tiempo ante el SAT. Puede enviarlos en PDF por este medio o al correo {correo_recepcion}.\n\n¡Muchas gracias!'},
+  {id:'tpl-recordatorio', nombre:'Recordatorio', base:true, asunto:'Recordatorio: documentos pendientes de {periodo} – {empresa}', texto:
+'Hola {contacto}, ¿cómo está? Le escribe {remitente}.\n\nPara cerrar la contabilidad de {periodo} de {empresa} aún me faltan estos documentos:\n\n{documentos}\n\nLe agradeceré enviarlos a más tardar el {fecha_limite} para no presentar la declaración fuera de plazo. Quedo atento, gracias.'},
+  {id:'tpl-actualizacion', nombre:'Declaración anual', base:true, asunto:'Documentos para la declaración anual {anio} – {empresa}', texto:
+'Hola {contacto}, buen día. Le escribe {remitente}.\n\nYa estamos preparando la declaración anual {anio} de {empresa}. Para incluir todas sus deducciones e ingresos, le pido por favor:\n\n{documentos}\n\nSi me los comparte antes del {fecha_limite} tendremos tiempo de revisar todo con calma. ¡Gracias!'}
+];
+function prevMonth(){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function fmtPeriodo(p){ if(!p) return 'el periodo'; const [y,m]=p.split('-').map(Number); return new Date(y,m-1,1).toLocaleDateString('es-MX',{month:'long',year:'numeric'}).replace(' de ',' '); }
+
+let db = null, mode = 'cargando';
+let userNs = null, myId = null, perfil = {};
+const names = {};
+function resolveNames(){}
+function quien(id){ if(!id) return ''; if(id===myId) return 'ti'; const u=names[id]; return (u&&(u.remitente||u.email))||'otro usuario'; }
+function firma(){ return perfil.remitente || state.ajustes.remitente || 'nuestro equipo'; }
+const state = {clientes:[], plantillas:[], solicitudes:[], ajustes:{remitente:'', catalogo:DEF_DOCS.slice()}};
+const ui = {
+  tab:'enviar', sel:new Set(), tpl:'tpl-inicial',
+  docs:new Set(DEF_DOCS.slice(0,4)), fecha:plusDays(7), periodo:prevMonth(), busq:'', prev:null,
+  registrar:true, opened:{}, filtro:'abiertas', fperiodo:'', editCli:null, confirm:null
+};
+
+/* ---------- utilidades ---------- */
+function plusDays(n){const d=new Date();d.setDate(d.getDate()+n);return ymd(d)}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmtFecha(s,corto){ if(!s) return ''; const [y,m,d]=s.split('-').map(Number); const dt=new Date(y,m-1,d);
+  return dt.toLocaleDateString('es-MX', corto?{day:'numeric',month:'short'}:{weekday:'long',day:'numeric',month:'long'}); }
+function fmtTS(iso){ if(!iso) return ''; const d=new Date(iso); return d.toLocaleDateString('es-MX',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}); }
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function phone(raw){ const d=String(raw||'').replace(/\D/g,''); if(d.length===10) return '52'+d; if(d.length===13&&d.startsWith('521')) return '52'+d.slice(3); return d; }
+function phoneOk(raw){ const p=phone(raw); return p.length>=11 && p.length<=15; }
+function fmtPhone(raw){ const p=phone(raw); if(p.length===12&&p.startsWith('52')) return '+52 '+p.slice(2,4)+' '+p.slice(4,8)+' '+p.slice(8); return p?'+'+p:'—'; }
+function waLink(raw,msg){ return 'https://wa.me/'+phone(raw)+'?text='+encodeURIComponent(msg); }
+function emailOk(s){ return /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(String(s||'').trim()); }
+const MAIL_APPS = {gmail:'Gmail', outlook:'Outlook (trabajo / Microsoft 365)', outlooklive:'Outlook.com / Hotmail', mailto:'App de correo del equipo (Mail, Outlook de escritorio…)'};
+function mailLink(to,subj,body){
+  const e=encodeURIComponent, app=state.ajustes.correoApp||'gmail';
+  if(app==='mailto') return 'mailto:'+encodeURIComponent(to).replace('%40','@')+'?subject='+e(subj)+'&body='+e(body);
+  if(app==='outlook') return 'https://outlook.office.com/mail/deeplink/compose?to='+e(to)+'&subject='+e(subj)+'&body='+e(body);
+  if(app==='outlooklive') return 'https://outlook.live.com/mail/0/deeplink/compose?to='+e(to)+'&subject='+e(subj)+'&body='+e(body);
+  const from=perfil.gmail||correoPrincipal();
+  return 'https://mail.google.com/mail/?'+(from?'authuser='+e(from)+'&':'')+'view=cm&fs=1&to='+e(to)+'&su='+e(subj)+'&body='+e(body);
+}
+function gmailSearch(clienteMail, desdeISO){
+  const cuenta = perfil.gmail || correoPrincipal();
+  let q = 'from:' + clienteMail;
+  if(desdeISO){ const d=new Date(desdeISO); q += ' after:' + d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0'); }
+  return 'https://mail.google.com/mail/' + (cuenta ? '?authuser=' + encodeURIComponent(cuenta) : '') + '#search/' + encodeURIComponent(q);
+}
+function usaGmail(){ const a=state.ajustes.correoApp||'gmail'; return a!=='outlook' && a!=='outlooklive'; }
+const DEF_ASUNTO = 'Solicitud de documentos – {empresa}';
+function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>el.hidden=true,2400); }
+function today(){return ymd(new Date())}
+
+function plantillas(){
+  const stored = Object.fromEntries(state.plantillas.map(p=>[p.id,p]));
+  const out = DEF_TPL.map(t => stored[t.id] ? {...t, ...stored[t.id], base:true, editada:true} : t);
+  state.plantillas.filter(p=>!DEF_TPL.some(t=>t.id===p.id)).forEach(p=>out.push(p));
+  return out;
+}
+function tplById(id){ return plantillas().find(t=>t.id===id) || plantillas()[0]; }
+function buildSubj(tpl, cli, periodo=ui.periodo){ return buildMsg(tpl.asunto||DEF_ASUNTO, cli, [], null, periodo).replace(/\n/g,' '); }
+function canWa(c){ return phoneOk(c.telefono); }
+function canMail(c){ return emailOk(c.correo); }
+function buildMsg(texto, cli, docs, fecha, periodo=ui.periodo){
+  const lista = docs.map(d=>'• '+d).join('\n');
+  return texto
+    .replaceAll('{periodo}', fmtPeriodo(periodo))
+    .replaceAll('{anio}', periodo?periodo.slice(0,4):String(new Date().getFullYear()-1))
+    .replaceAll('{contacto}', cli.contacto||'')
+    .replaceAll('{empresa}', cli.empresa||cli.contacto||'su empresa')
+    .replaceAll('{documentos}', lista || '• (sin documentos seleccionados)')
+    .replaceAll('{fecha_limite}', fecha?fmtFecha(fecha):'lo antes posible')
+    .replaceAll('{remitente}', firma())
+    .replaceAll('al correo {correo_recepcion}', correoPrincipal()?'al correo {correo_recepcion}':'por correo')
+    .replaceAll('{correo_recepcion}', correoPrincipal()||'mi correo')
+    .replace(/Hola ,/g,'Hola,');
+}
+function estado(s){
+  const tot=(s.docs||[]).length, ok=(s.docs||[]).filter(d=>d.recibido).length;
+  if(tot && ok===tot) return 'completa';
+  if(s.fechaLimite && s.fechaLimite < today()) return 'vencida';
+  return 'pendiente';
+}
+
+/* ---------- almacenamiento ---------- */
+function loadLocal(){ try{ const j=JSON.parse(localStorage.getItem(LS_KEY)||'null'); if(j){ ['clientes','plantillas','solicitudes'].forEach(k=>state[k]=j[k]||[]); if(j.ajustes) state.ajustes={...state.ajustes,...j.ajustes}; } }catch(e){} }
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function sortAll(){
+  state.clientes.sort((a,b)=>(a.empresa||a.contacto||'').localeCompare(b.empresa||b.contacto||'','es'));
+  state.solicitudes.sort((a,b)=>(b.creado||'').localeCompare(a.creado||''));
+}
+async function put(col,id,obj){
+  if(db){ try{ await db.collection(col).doc(id).set(obj); } catch(e){ handleErr(e); } return; }
+  if(col==='config'){ state.ajustes={...state.ajustes,...obj}; }
+  else { const arr=state[col]; const i=arr.findIndex(x=>x.id===id); const rec={id,...obj}; if(i>=0) arr[i]=rec; else arr.push(rec); }
+  sortAll(); saveLocal(); render();
+}
+async function del(col,id){
+  if(db){ try{ await db.collection(col).doc(id).delete(); } catch(e){ handleErr(e); } return; }
+  state[col]=state[col].filter(x=>x.id!==id); saveLocal(); render();
+}
+function strip(o){ const {id,...rest}=o; return rest; }
+function handleErr(e){
+  const c=e&&e.code;
+  if(c==='permission-denied') toast('No tienes permiso para modificar estos datos. Revisa las reglas de Firebase.');
+  else if(c==='resource-exhausted') toast('Se alcanzó el límite gratuito de Firebase por hoy.');
+  else if(c==='unavailable') toast('Sin conexión. Los cambios se guardarán al volver internet.');
+  else toast('No se pudo guardar. Intenta de nuevo.');
+}
+function setMode(m){
+  mode=m; const el=document.getElementById('mode');
+  el.innerHTML = m==='db' ? `<span class="dot ok"></span><span>${esc(currentEmail||'Conectado')}</span>`
+    : m==='local' ? '<span class="dot w"></span><span>Modo prueba: solo este navegador</span>'
+    : '<span class="dot"></span><span>Conectando…</span>';
+}
+
+/* ---------- conexión con Firebase ---------- */
+const CFG_KEY='solicitud-docs-firebase-config';
+let currentEmail='', unsubs=[];
+function show(id){ ['setup','login','app'].forEach(x=>document.getElementById(x).hidden = x!==id); }
+function parseConfig(txt){
+  const keys=['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
+  const out={};
+  keys.forEach(k=>{ const m=txt.match(new RegExp(k+'\\s*["\']?\\s*:\\s*["\']([^"\']+)["\']')); if(m) out[k]=m[1]; });
+  return out.apiKey&&out.projectId&&out.appId ? out : null;
+}
+function getConfig(){
+  if(FIREBASE_CONFIG) return FIREBASE_CONFIG;
+  try{ return JSON.parse(localStorage.getItem(CFG_KEY)||'null'); }catch(e){ return null; }
+}
+function startLocal(){
+  db=null; myId='local'; currentEmail='';
+  loadLocal(); sortAll(); setMode('local'); show('app'); render();
+}
+function initFirebase(){
+  const cfg=getConfig();
+  if(!cfg || !window.firebase){ show('setup'); return; }
+  try{ if(!firebase.apps.length){ firebase.initializeApp(cfg); firebase.firestore().settings({ignoreUndefinedProperties:true, merge:true}); } }
+  catch(e){ show('setup'); showErr('setupErr','La configuración no es válida. Cópiala completa desde Firebase.'); return; }
+  const auth=firebase.auth();
+  auth.onAuthStateChanged(u=>{
+    unsubs.forEach(f=>{ try{f()}catch(e){} }); unsubs=[];
+    if(!u){ db=null; myId=null; show('login'); return; }
+    db=firebase.firestore(); myId=u.uid; currentEmail=u.email||'';
+    show('app'); setMode('db'); document.getElementById('logout').hidden=false;
+    subscribe(); render();
+  });
+}
+function subscribe(){
+  const fail=e=>{ if(e&&e.code==='permission-denied') toast('Firebase no dio permiso de leer los datos. Revisa las reglas de seguridad.'); else toast('Se perdió la conexión con los datos.'); };
+  ['clientes','plantillas','solicitudes'].forEach(col=>{
+    unsubs.push(db.collection(col).onSnapshot(s=>{
+      state[col]=s.docs.map(x=>({id:x.id,...x.data()})); sortAll(); render();
+    }, fail));
+  });
+  unsubs.push(db.doc('config/ajustes').onSnapshot(s=>{
+    state.ajustes = s.exists ? {remitente:'',catalogo:DEF_DOCS.slice(),...s.data()} : {remitente:'',catalogo:DEF_DOCS.slice()};
+    render();
+  }, fail));
+  unsubs.push(db.collection('usuarios').onSnapshot(s=>{
+    s.docs.forEach(d=>{ names[d.id]=d.data(); });
+    perfil = names[myId] ? {...names[myId]} : {};
+    render();
+  }, ()=>{}));
+}
+function showErr(id,msg){ const el=document.getElementById(id); el.textContent=msg; el.hidden=!msg; }
+const AUTH_ERR={'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/wrong-password':'Correo o contraseña incorrectos.','auth/user-not-found':'Ese correo no tiene acceso. Pídele al administrador que te dé de alta.','auth/invalid-email':'Escribe un correo válido.','auth/too-many-requests':'Demasiados intentos. Espera unos minutos.','auth/network-request-failed':'Sin conexión a internet.','auth/user-disabled':'Tu acceso fue desactivado.'};
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault(); showErr('lgErr','');
+  const btn=document.getElementById('lgBtn'); btn.disabled=true;
+  try{ await firebase.auth().signInWithEmailAndPassword(document.getElementById('lgMail').value.trim(), document.getElementById('lgPass').value); }
+  catch(err){
+    const c=String(err.code||'');
+    showErr('lgErr', AUTH_ERR[c]
+      || (c.includes('api-key') ? 'La clave de Firebase (apiKey) no es válida. Revisa la configuración en index.html.'
+      : c==='auth/configuration-not-found'||c==='auth/operation-not-allowed' ? 'Falta activar “Correo electrónico/contraseña” en Firebase › Authentication.'
+      : 'No se pudo entrar ('+c+'). Intenta de nuevo.'));
+  }
+  btn.disabled=false;
+});
+document.getElementById('lgReset').addEventListener('click',async()=>{
+  const m=document.getElementById('lgMail').value.trim();
+  if(!emailOk(m)){ showErr('lgErr','Escribe tu correo arriba y vuelve a tocar “Olvidé mi contraseña”.'); return; }
+  try{ await firebase.auth().sendPasswordResetEmail(m); showErr('lgErr',''); toast('Te enviamos un correo para cambiar la contraseña.'); }
+  catch(err){ showErr('lgErr', AUTH_ERR[err.code]||'No se pudo enviar el correo.'); }
+});
+document.getElementById('logout').addEventListener('click',()=>{ firebase.auth().signOut(); });
+document.getElementById('setupForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const cfg=parseConfig(document.getElementById('cfgText').value);
+  if(!cfg){ showErr('setupErr','No encontré apiKey, projectId y appId. Pega el bloque firebaseConfig completo.'); return; }
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(_){}
+  location.reload();
+});
+document.getElementById('localBtn').addEventListener('click',startLocal);
+
+/* ---------- render ---------- */
+function renderTabs(){
+  const pend = state.solicitudes.filter(s=>estado(s)!=='completa').length;
+  const tabs=[['enviar','Enviar',null],['seguimiento','Seguimiento',pend],['clientes','Clientes',state.clientes.length],['ajustes','Plantillas y ajustes',null]];
+  document.getElementById('tabs').innerHTML = tabs.map(([k,t,n])=>
+    `<button role="tab" data-act="tab" data-k="${k}" aria-selected="${ui.tab===k}">${t}${n!=null?`<span class="count">${n}</span>`:''}</button>`).join('');
+}
+function render(){
+  renderTabs();
+  const v=document.getElementById('view');
+  const keep = document.activeElement && document.activeElement.id;
+  v.innerHTML = ({enviar:viewEnviar, seguimiento:viewSeg, clientes:viewClientes, ajustes:viewAjustes})[ui.tab]();
+  if(keep){ const el=document.getElementById(keep); if(el && el.tagName!=='BUTTON'){ el.focus(); if(el.setSelectionRange && el.type!=='date' && el.value!=null) try{el.setSelectionRange(el.value.length,el.value.length)}catch(e){} } }
+}
+
+function clientRows(){
+  const q=ui.busq.trim().toLowerCase();
+  const list=state.clientes.filter(c=>!q||[c.empresa,c.contacto,c.telefono].join(' ').toLowerCase().includes(q));
+  if(!state.clientes.length) return `<div class="empty">Aún no hay clientes guardados.<br><button class="btn sm" data-act="tab" data-k="clientes" style="margin-top:8px">Agregar clientes</button></div>`;
+  if(!list.length) return `<div class="empty">Ningún cliente coincide con “${esc(ui.busq)}”.</div>`;
+  return list.map(c=>`<label class="citem"><input type="checkbox" data-act="sel" data-id="${c.id}" ${ui.sel.has(c.id)?'checked':''}>
+    <span class="who"><b>${esc(c.empresa||c.contacto)}${c.ejemplo?'<span class="ex">EJEMPLO</span>':''}</b><span>${esc(c.contacto||'')}${c.contacto?' · ':''}${canWa(c)?`<span class="mono">${esc(fmtPhone(c.telefono))}</span>`:''}${canWa(c)&&canMail(c)?' · ':''}${canMail(c)?esc(c.correo):''}</span></span>
+    ${canWa(c)||canMail(c)?'':'<span class="tag bad">Sin contacto válido</span>'}</label>`).join('');
+}
+
+function viewEnviar(){
+  const tpls=plantillas(); const tpl=tplById(ui.tpl);
+  const docs=[...ui.docs];
+  const cat=[...new Set([...state.ajustes.catalogo, ...docs])];
+  const sel=state.clientes.filter(c=>ui.sel.has(c.id));
+  if(!sel.some(c=>c.id===ui.prev)) ui.prev = sel[0]?.id || null;
+  const prevCli = sel.find(c=>c.id===ui.prev);
+  return `<div class="grid2">
+  <section class="panel">
+    <h2><span class="step">1</span> Clientes</h2>
+    <div class="row">
+      <input type="search" id="busq" placeholder="Buscar por empresa, contacto o teléfono" value="${esc(ui.busq)}" style="flex:1 1 200px">
+      <button class="btn sm ghost" data-act="selall">Todos</button>
+      <button class="btn sm ghost" data-act="selnone">Ninguno</button>
+    </div>
+    <div class="clist" id="clist">${clientRows()}</div>
+
+    <h2><span class="step">2</span> Mensaje</h2>
+    <div class="row">
+      <div class="field"><span class="lbl">Plantilla</span>
+        <select id="tplsel">${tpls.map(t=>`<option value="${t.id}" ${t.id===tpl.id?'selected':''}>${esc(t.nombre)}</option>`).join('')}</select></div>
+      <div class="field" style="flex:0 1 170px"><span class="lbl">Periodo</span>
+        <input type="month" id="periodo" value="${esc(ui.periodo)}"></div>
+      <div class="field" style="flex:0 1 170px"><span class="lbl">Fecha límite</span>
+        <input type="date" id="fecha" value="${esc(ui.fecha)}"></div>
+    </div>
+    <div class="field"><span class="lbl">Documentos a solicitar · ${docs.length} elegidos</span>
+      <div class="chips">${cat.map(d=>`<button class="chip" data-act="doc" data-d="${esc(d)}" aria-pressed="${ui.docs.has(d)}">${esc(d)}</button>`).join('')}</div>
+    </div>
+    <form class="row" data-form="docextra">
+      <input type="text" id="docextra" placeholder="Otro documento (solo para este envío)" style="flex:1 1 200px">
+      <button class="btn sm" type="submit">Agregar</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2><span class="step">3</span> Enviar por WhatsApp o correo</h2>
+    ${!sel.length ? `<div class="empty">Elige uno o más clientes para ver el mensaje y los botones de envío.</div>` : `
+    <div class="note"><span class="lbl">Asunto del correo</span><br>${esc(buildSubj(tpl, prevCli))}</div>
+    <div class="chat"><div class="bubble">${esc(buildMsg(tpl.texto, prevCli, docs, ui.fecha))}<small>Vista previa · ${esc(prevCli.empresa||prevCli.contacto)}</small></div></div>
+    <label class="row note" style="gap:8px;cursor:pointer"><input type="checkbox" id="registrar" data-act="registrar" ${ui.registrar?'checked':''} style="accent-color:var(--accent)"> Registrar en Seguimiento al abrir el chat</label>
+    <div class="sendlist">${sel.map(c=>{
+      const wa=canWa(c), ml=canMail(c); const msg=buildMsg(tpl.texto,c,docs,ui.fecha); const op=ui.opened[c.id];
+      return `<div class="sendrow ${c.id===ui.prev?'on':''}">
+        <div class="who"><b>${esc(c.empresa||c.contacto)}</b><span class="mono muted">${wa?esc(fmtPhone(c.telefono)):'Sin WhatsApp'}</span><br><span class="muted" style="font-size:.82rem">${ml?esc(c.correo):'Sin correo'}</span></div>
+        ${op?'<span class="tag ok">Abierto</span>':''}
+        <button class="btn sm ghost" data-act="prev" data-id="${c.id}">Ver</button>
+        <button class="btn sm" data-act="copy" data-id="${c.id}">Copiar</button>
+        <a class="btn sm ${wa?'pri':''}" data-act="open" data-id="${c.id}" href="${wa?esc(waLink(c.telefono,msg)):'#'}" target="_blank" rel="noopener" ${wa&&docs.length?'':'aria-disabled="true"'}>WhatsApp</a>
+        <a class="btn sm ${wa?'':'pri'}" data-act="open" data-id="${c.id}" href="${ml?esc(mailLink(c.correo,buildSubj(tpl,c),msg)):'#'}" target="_blank" rel="noopener" ${ml&&docs.length?'':'aria-disabled="true"'}>Correo</a>
+      </div>`}).join('')}</div>
+    <p class="note">Cada botón abre WhatsApp o ${esc(MAIL_APPS[state.ajustes.correoApp||'gmail'])} con el mensaje ya escrito; tú confirmas el envío ahí. Puedes usar ambos con el mismo cliente; la solicitud se registra una sola vez. Si un enlace no abre, usa <b>Copiar</b>.</p>`}
+  </section></div>`;
+}
+
+function viewSeg(){
+  const periodos=[...new Set(state.solicitudes.map(s=>s.periodo).filter(Boolean))].sort().reverse();
+  if(ui.fperiodo && !periodos.includes(ui.fperiodo)) ui.fperiodo='';
+  const all=state.solicitudes.filter(s=>!ui.fperiodo||s.periodo===ui.fperiodo);
+  const f=ui.filtro;
+  const match=(s,k)=>{ const e=estado(s), r=(s.respuestas||[]).length;
+    return k==='todas' || (k==='abiertas'?e!=='completa' : k==='sinresp'?(e!=='completa'&&!r) : k==='respondio'?(e!=='completa'&&r>0) : e===k); };
+  const list=all.filter(s=>match(s,f));
+  const n=k=>all.filter(s=>match(s,k)).length;
+  const rec=tplById('tpl-recordatorio');
+  const fl=[['abiertas','Por recibir'],['sinresp','Sin respuesta'],['respondio','Respondieron'],['vencida','Vencidas'],['completa','Completas'],['todas','Todas']];
+  return `<div style="display:flex;flex-direction:column;gap:16px">
+  <div class="row" style="justify-content:space-between">
+    <div class="filters">${fl.map(([k,t])=>`<button class="chip" data-act="filtro" data-k="${k}" aria-pressed="${f===k}">${t} <span class="mono">${n(k)}</span></button>`).join('')}</div>
+    ${periodos.length?`<select id="fperiodo" style="width:auto;flex:0 1 220px" aria-label="Filtrar por periodo"><option value="">Todos los periodos</option>${periodos.map(p=>`<option value="${p}" ${ui.fperiodo===p?'selected':''}>${esc(fmtPeriodo(p))}</option>`).join('')}</select>`:''}
+  </div>
+  ${!list.length ? `<div class="panel"><div class="empty">${all.length?'No hay solicitudes en este filtro.':'Aquí aparecerá cada solicitud que abras desde la pestaña Enviar, con su lista de documentos para ir marcando lo que llegue.'}</div></div>` :
+  `<div class="cards">${list.map(s=>{
+    const e=estado(s); const docs=s.docs||[]; const ok=docs.filter(d=>d.recibido).length;
+    const pend=docs.filter(d=>!d.recibido).map(d=>d.nombre);
+    const cli=state.clientes.find(c=>c.id===s.clienteId)||{empresa:s.empresa,contacto:s.contacto,telefono:s.telefono,correo:s.correo};
+    const tel=cli.telefono||s.telefono, mail=cli.correo||s.correo;
+    const msg=buildMsg(rec.texto,cli,pend,s.fechaLimite,s.periodo||'');
+    const tag = e==='completa'?'<span class="tag ok">Completa</span>':e==='vencida'?'<span class="tag bad">Vencida</span>':'<span class="tag w">Pendiente</span>';
+    return `<article class="card ${e}">
+      <header><div><h3>${esc(cli.empresa||cli.contacto||'Cliente')}</h3>
+        ${s.periodo?`<div class="lbl" style="margin:2px 0">${esc(fmtPeriodo(s.periodo))}</div>`:''}
+        <div class="meta">Solicitado ${esc(fmtTS(s.creado))}${s.por?' por '+esc(quien(s.por)):''}${s.fechaLimite?` · límite ${esc(fmtFecha(s.fechaLimite,true))}`:''}${s.recordatorios?` · ${s.recordatorios} recordatorio${s.recordatorios>1?'s':''}`:''}</div></div>${tag}</header>
+      <div><div class="meta" style="margin-bottom:4px"><span class="mono">${ok} de ${docs.length}</span> recibidos</div><div class="bar"><i style="width:${docs.length?Math.round(ok/docs.length*100):0}%"></i></div></div>
+      ${respBlock(s)}
+      <ul class="doclist">${docs.map((d,i)=>`<li><label><input type="checkbox" data-act="rec" data-id="${s.id}" data-i="${i}" ${d.recibido?'checked':''}><span class="${d.recibido?'done':''}">${esc(d.nombre)}</span></label></li>`).join('')}</ul>
+      ${ui.confirm==='s:'+s.id?`<div class="confirm">¿Eliminar esta solicitud? <button class="btn sm danger" data-act="delsol" data-id="${s.id}">Eliminar</button><button class="btn sm ghost" data-act="cancel">Cancelar</button></div>`:''}
+      <footer>
+        ${e!=='completa'&&phoneOk(tel)?`<a class="btn sm pri" data-act="remind" data-id="${s.id}" href="${esc(waLink(tel,msg))}" target="_blank" rel="noopener">Recordar por WhatsApp</a>`:''}
+        ${e!=='completa'&&emailOk(mail)?`<a class="btn sm ${phoneOk(tel)?'':'pri'}" data-act="remind" data-id="${s.id}" href="${esc(mailLink(mail,buildSubj(rec,cli,s.periodo||''),msg))}" target="_blank" rel="noopener">Recordar por correo</a>`:''}
+        ${e!=='completa'?`<button class="btn sm" data-act="copyrem" data-id="${s.id}">Copiar recordatorio</button>`:''}
+        ${emailOk(mail)&&usaGmail()?`<a class="btn sm" href="${esc(gmailSearch(mail,s.creado))}" target="_blank" rel="noopener" title="Abre Gmail con los correos de este cliente desde que le pediste los documentos">Ver respuesta en Gmail</a>`:''}
+        <button class="btn sm ghost danger" data-act="askdelsol" data-id="${s.id}">Eliminar</button>
+      </footer></article>`}).join('')}</div>`}
+  </div>`;
+}
+
+const CANAL = {whatsapp:'WhatsApp', correo:'correo'};
+function respBlock(s){
+  const resp=s.respuestas||[]; const last=resp[resp.length-1];
+  const marcar = `<div class="row" style="gap:6px"><span class="meta">¿Ya contestó?</span>
+    <button class="btn sm" data-act="resp" data-canal="whatsapp" data-id="${s.id}">Respondió por WhatsApp</button>
+    <button class="btn sm" data-act="resp" data-canal="correo" data-id="${s.id}">Respondió por correo</button></div>`;
+  if(!last) return estado(s)==='completa' ? '' : marcar;
+  const extra = resp.length>1 ? ` · ${resp.length} respuestas` : '';
+  const adj = (last.adjuntos||[]).length ? `<div class="meta">Adjuntos: ${last.adjuntos.map(esc).join(', ')}</div>` : '';
+  return `<div class="resp"><div style="flex:1;min-width:0"><b>Respondió por ${esc(CANAL[last.canal]||last.canal)}</b>
+      <span class="meta"> · ${esc(fmtTS(last.fecha))}${last.origen==='auto'?' · detectado automáticamente':(last.por?' · marcó '+esc(quien(last.por)):'')}${extra}</span>${adj}</div>
+      <button class="btn sm ghost" data-act="unresp" data-id="${s.id}" title="Quitar la última respuesta marcada">Deshacer</button></div>
+    ${estado(s)==='completa'?'':`<details><summary class="meta" style="cursor:pointer">Marcar otra respuesta</summary>${marcar}</details>`}`;
+}
+function recepcion(){ return state.ajustes.recepcion||[]; }
+function correoPrincipal(){ const r=recepcion(); return ((r.find(x=>x.principal)||r[0])||{}).correo||''; }
+
+function viewClientes(){
+  const ed = ui.editCli ? state.clientes.find(c=>c.id===ui.editCli) : null;
+  return `<div class="grid2">
+  <section class="panel">
+    <h2>${ed?'Editar cliente':'Nuevo cliente'}</h2>
+    <form data-form="cliente" style="display:flex;flex-direction:column;gap:12px">
+      <div class="row">
+        <div class="field" style="flex:2 1 220px"><span class="lbl">Nombre o razón social</span><input type="text" id="c-emp" value="${esc(ed?.empresa||'')}" placeholder="Persona física o moral"></div>
+        <div class="field" style="flex:1 1 150px"><span class="lbl">RFC</span><input type="text" id="c-rfc" value="${esc(ed?.rfc||'')}" placeholder="Opcional" style="text-transform:uppercase"></div>
+      </div>
+      <div class="row">
+        <div class="field"><span class="lbl">Contacto</span><input type="text" id="c-con" value="${esc(ed?.contacto||'')}" placeholder="Nombre de quien recibe"></div>
+        <div class="field"><span class="lbl">WhatsApp</span><input type="tel" id="c-tel" value="${esc(ed?.telefono||'')}" placeholder="10 dígitos, ej. 771 123 4567"></div>
+      </div>
+      <div class="field"><span class="lbl">Correo</span><input type="text" inputmode="email" autocomplete="off" id="c-mail" value="${esc(ed?.correo||'')}" placeholder="contacto@empresa.com.mx"></div>
+      <div class="field"><span class="lbl">Notas</span><input type="text" id="c-not" value="${esc(ed?.notas||'')}" placeholder="Régimen, cuentas bancarias que maneja, horario de contacto…"></div>
+      <div class="row"><button class="btn pri" type="submit">${ed?'Guardar cambios':'Guardar cliente'}</button>${ed?'<button class="btn ghost" type="button" data-act="canceledit">Cancelar</button>':''}</div>
+      <p class="note">Basta con WhatsApp o correo; con ambos podrás enviar por los dos. Con 10 dígitos se agrega la clave de México (+52) automáticamente.</p>
+    </form>
+    <h2 style="margin-top:6px">Agregar varios</h2>
+    <form data-form="import" style="display:flex;flex-direction:column;gap:10px">
+      <textarea id="imp" style="min-height:96px" placeholder="Una línea por cliente: Empresa, Contacto, Teléfono, Correo&#10;Abarrotes La Esperanza, Luis Hernández, 7711234567, compras@esperanza.mx"></textarea>
+      <div class="row"><button class="btn" type="submit">Importar lista</button><span class="note">También puedes pegar columnas copiadas de Excel.</span></div>
+    </form>
+  </section>
+  <section class="panel">
+    <h2>Clientes guardados <span class="count mono muted">${state.clientes.length}</span></h2>
+    ${!state.clientes.length?'<div class="empty">Todavía no hay clientes. Agrega el primero con el formulario.</div>':
+    `<div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Contacto</th><th>WhatsApp</th><th>Correo</th><th></th></tr></thead><tbody>
+    ${state.clientes.map(c=>`<tr><td><b>${esc(c.empresa||'—')}</b>${c.ejemplo?'<span class="ex">EJEMPLO</span>':''}${c.rfc?`<div class="mono muted">${esc(c.rfc)}</div>`:''}${c.notas?`<div class="meta">${esc(c.notas)}</div>`:''}</td><td>${esc(c.contacto||'—')}</td>
+      <td class="mono">${c.telefono?esc(fmtPhone(c.telefono))+(phoneOk(c.telefono)?'':' <span class="tag bad">revisar</span>'):'—'}</td>
+      <td>${c.correo?esc(c.correo)+(emailOk(c.correo)?'':' <span class="tag bad">revisar</span>'):'—'}</td>
+      <td class="act">${ui.confirm==='c:'+c.id?`<span class="confirm" style="display:inline-flex">¿Eliminar? <button class="btn sm danger" data-act="delcli" data-id="${c.id}">Sí</button><button class="btn sm ghost" data-act="cancel">No</button></span>`:
+      `<button class="btn sm pri" data-act="solicitar" data-id="${c.id}">Solicitar</button> <button class="btn sm ghost" data-act="editcli" data-id="${c.id}">Editar</button> <button class="btn sm ghost danger" data-act="askdelcli" data-id="${c.id}">Eliminar</button>`}</td></tr>`).join('')}
+    </tbody></table></div>`}
+  </section></div>`;
+}
+
+function viewAjustes(){
+  const tpls=plantillas();
+  return `<div class="grid2">
+  <section class="panel">
+    <h2>Plantillas de mensaje</h2>
+    <p class="note">Campos que se rellenan solos: <span class="ph">{contacto}</span> <span class="ph">{empresa}</span> <span class="ph">{documentos}</span> <span class="ph">{fecha_limite}</span> <span class="ph">{periodo}</span> <span class="ph">{anio}</span> <span class="ph">{remitente}</span> <span class="ph">{correo_recepcion}</span></p>
+    ${tpls.map(t=>`<form class="tpl" data-form="tpl" data-id="${t.id}">
+      <div class="row"><input type="text" id="tn-${t.id}" value="${esc(t.nombre)}" style="flex:1 1 200px;font-weight:600">${t.id==='tpl-recordatorio'?'<span class="tag ok">Se usa en Seguimiento</span>':''}</div>
+      <div class="field"><span class="lbl">Asunto del correo</span><input type="text" id="ts-${t.id}" value="${esc(t.asunto||DEF_ASUNTO)}"></div>
+      <textarea id="tt-${t.id}">${esc(t.texto)}</textarea>
+      <div class="row"><button class="btn sm pri" type="submit">Guardar</button>
+      ${t.base? (t.editada?`<button class="btn sm ghost" type="button" data-act="restaurar" data-id="${t.id}">Restaurar original</button>`:'')
+        : (ui.confirm==='t:'+t.id?`<span class="confirm">¿Eliminar plantilla? <button class="btn sm danger" type="button" data-act="deltpl" data-id="${t.id}">Eliminar</button><button class="btn sm ghost" type="button" data-act="cancel">Cancelar</button></span>`:`<button class="btn sm ghost danger" type="button" data-act="askdeltpl" data-id="${t.id}">Eliminar</button>`)}
+      </div></form>`).join('')}
+    <button class="btn" data-act="newtpl">+ Nueva plantilla</button>
+  </section>
+  <section class="panel">
+    ${myId?`<h2>Tus datos <span class="tag ok">Solo tú los ves</span></h2>
+    <form data-form="perfil" style="display:flex;flex-direction:column;gap:10px">
+      <div class="field"><span class="lbl">Tu firma en los mensajes</span><input type="text" id="p-firma" value="${esc(perfil.remitente||'')}" placeholder="Ej. C.P. Ana López, de su despacho contable"></div>
+      <div class="field"><span class="lbl">Tu cuenta de Gmail para redactar</span><input type="text" inputmode="email" autocomplete="off" id="p-gmail" value="${esc(perfil.gmail||'')}" placeholder="Si la dejas vacía se usa el correo principal"></div>
+      <div class="row"><button class="btn sm pri" type="submit">Guardar mis datos</button></div>
+    </form>
+    <p class="note">Cada persona que usa la herramienta pone aquí su propia firma, así el cliente sabe quién le escribe.</p>`:''}
+    <h2 style="margin-top:6px">Firma del despacho</h2>
+    <form class="row" data-form="remitente">
+      <input type="text" id="remit" value="${esc(state.ajustes.remitente)}" placeholder="Ej. Despacho Contable Kirvy" style="flex:1 1 200px">
+      <button class="btn sm pri" type="submit">Guardar</button>
+    </form>
+    <p class="note">Se usa en <span class="ph">{remitente}</span> cuando la persona que envía no ha puesto su propia firma.</p>
+    <h2 style="margin-top:6px">Correos de recepción</h2>
+    <p class="note">Las cuentas donde tus clientes te mandan los documentos. La principal aparece en los mensajes como <span class="ph">{correo_recepcion}</span> y, con Gmail, es la cuenta desde la que se redactan los correos.</p>
+    ${recepcion().length?`<div class="mlist">${recepcion().map((r,i)=>`<div class="mrow">
+      <span class="addr">${esc(r.correo)}</span>
+      ${(r.principal||(!recepcion().some(x=>x.principal)&&i===0))?'<span class="tag ok">Principal</span>':`<button class="btn sm ghost" data-act="mprinc" data-i="${i}">Hacer principal</button>`}
+      <span class="tag w" title="Aún no hay conexión con la bandeja de entrada">Detección: sin conectar</span>
+      ${ui.confirm==='m:'+i?`<span class="confirm">¿Quitar? <button class="btn sm danger" data-act="mdel" data-i="${i}">Quitar</button><button class="btn sm ghost" data-act="cancel">No</button></span>`:`<button class="btn sm ghost danger" data-act="askmdel" data-i="${i}">Quitar</button>`}
+    </div>`).join('')}</div>`:'<div class="empty" style="padding:14px">Agrega el correo donde recibes documentos, por ejemplo tu Gmail del despacho.</div>'}
+    <form class="row" data-form="mail">
+      <input type="text" inputmode="email" autocomplete="off" id="mailnew" placeholder="recepcion@tudespacho.com" style="flex:1 1 200px">
+      <button class="btn sm" type="submit">Agregar correo</button>
+    </form>
+    <p class="note">El aviso automático de respuestas por correo necesita una conexión adicional con Gmail que se agregará más adelante. Mientras tanto, marca las respuestas a mano en cada solicitud.</p>
+    <h2 style="margin-top:6px">Redactar correos en</h2>
+    <div class="field"><span class="lbl">Servicio de correo</span>
+      <select id="mailapp">${Object.entries(MAIL_APPS).map(([k,t])=>`<option value="${k}" ${(state.ajustes.correoApp||'gmail')===k?'selected':''}>${t}</option>`).join('')}</select></div>
+    <p class="note">El botón Correo abre una ventana de redacción en ese servicio con destinatario, asunto y mensaje listos. Debes tener la sesión iniciada en el navegador. Los archivos adjuntos no aplican: el cliente te responde con los documentos.</p>
+    <h2 style="margin-top:6px">Catálogo de documentos</h2>
+    <div class="chips">${state.ajustes.catalogo.map((d,i)=>`<span class="chip" style="cursor:default">${esc(d)}<button class="btn sm ghost" style="padding:0 4px" data-act="delcat" data-i="${i}" aria-label="Quitar ${esc(d)}"><span class="x">×</span></button></span>`).join('')}</div>
+    <form class="row" data-form="cat">
+      <input type="text" id="catnew" placeholder="Nuevo documento para el catálogo" style="flex:1 1 200px">
+      <button class="btn sm" type="submit">Agregar</button>
+    </form>
+  </section></div>`;
+}
+
+/* ---------- acciones ---------- */
+function registrarSolicitud(c){
+  if(!ui.registrar || ui.opened[c.id]) { ui.opened[c.id]=ui.opened[c.id]||'x'; return; }
+  const id=uid('s');
+  ui.opened[c.id]=id;
+  put('solicitudes',id,{clienteId:c.id,empresa:c.empresa||'',contacto:c.contacto||'',telefono:c.telefono||'',correo:c.correo||'',
+    docs:[...ui.docs].map(n=>({nombre:n,recibido:false})),fechaLimite:ui.fecha||'',periodo:ui.periodo||'',plantilla:tplById(ui.tpl).nombre,creado:new Date().toISOString(),recordatorios:0,por:myId||''});
+}
+function resetOpened(){ ui.opened={}; }
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); toast('Mensaje copiado'); }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    let ok=false; try{ ok=document.execCommand('copy'); }catch(_){} ta.remove(); toast(ok?'Mensaje copiado':'No se pudo copiar; selecciona el texto de la vista previa.'); }
+}
+
+document.addEventListener('click', e=>{
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const a=t.dataset.act, id=t.dataset.id;
+  if(t.tagName==='INPUT' && t.type==='checkbox') return; // se manejan en change
+  switch(a){
+    case 'tab': ui.tab=t.dataset.k; ui.confirm=null; render(); window.scrollTo({top:0}); break;
+    case 'selall': state.clientes.forEach(c=>ui.sel.add(c.id)); render(); break;
+    case 'selnone': ui.sel.clear(); render(); break;
+    case 'doc': { const d=t.dataset.d; ui.docs.has(d)?ui.docs.delete(d):ui.docs.add(d); resetOpened(); render(); break; }
+    case 'prev': ui.prev=id; render(); break;
+    case 'copy': { const c=state.clientes.find(x=>x.id===id); copyText(buildMsg(tplById(ui.tpl).texto,c,[...ui.docs],ui.fecha)); registrarSolicitud(c); render(); break; }
+    case 'open': { if(t.getAttribute('aria-disabled')==='true'){e.preventDefault();return;} const c=state.clientes.find(x=>x.id===id); registrarSolicitud(c); setTimeout(render,50); break; }
+    case 'filtro': ui.filtro=t.dataset.k; render(); break;
+    case 'remind': case 'copyrem': {
+      const s=state.solicitudes.find(x=>x.id===id); if(!s) break;
+      if(a==='copyrem'){ const cli=state.clientes.find(c=>c.id===s.clienteId)||s; copyText(buildMsg(tplById('tpl-recordatorio').texto,cli,(s.docs||[]).filter(d=>!d.recibido).map(d=>d.nombre),s.fechaLimite,s.periodo||'')); }
+      put('solicitudes',id,{...strip(s),recordatorios:(s.recordatorios||0)+1,ultimoRecordatorio:new Date().toISOString()}); break; }
+    case 'resp': { const s=state.solicitudes.find(x=>x.id===id); if(!s) break;
+      put('solicitudes',id,{...strip(s),respuestas:[...(s.respuestas||[]),{canal:t.dataset.canal,fecha:new Date().toISOString(),origen:'manual',por:myId||''}]});
+      toast('Marcado: respondió por '+CANAL[t.dataset.canal]); break; }
+    case 'unresp': { const s=state.solicitudes.find(x=>x.id===id); if(!s) break;
+      put('solicitudes',id,{...strip(s),respuestas:(s.respuestas||[]).slice(0,-1)}); break; }
+    case 'mprinc': { const r=recepcion().map((x,i)=>({...x,principal:i===+t.dataset.i})); put('config','ajustes',{...state.ajustes,recepcion:r}); break; }
+    case 'askmdel': ui.confirm='m:'+t.dataset.i; render(); break;
+    case 'mdel': { ui.confirm=null; const r=recepcion().filter((_,i)=>i!==+t.dataset.i); put('config','ajustes',{...state.ajustes,recepcion:r}); break; }
+    case 'askdelsol': ui.confirm='s:'+id; render(); break;
+    case 'delsol': ui.confirm=null; del('solicitudes',id); toast('Solicitud eliminada'); break;
+    case 'cancel': ui.confirm=null; render(); break;
+    case 'editcli': ui.editCli=id; render(); document.getElementById('c-emp')?.focus(); break;
+    case 'canceledit': ui.editCli=null; render(); break;
+    case 'askdelcli': ui.confirm='c:'+id; render(); break;
+    case 'delcli': ui.confirm=null; ui.sel.delete(id); del('clientes',id); toast('Cliente eliminado'); break;
+    case 'solicitar': ui.sel=new Set([id]); ui.prev=id; ui.tab='enviar'; resetOpened(); render(); window.scrollTo({top:0}); break;
+    case 'restaurar': del('plantillas',id); toast('Plantilla restaurada'); break;
+    case 'askdeltpl': ui.confirm='t:'+id; render(); break;
+    case 'deltpl': ui.confirm=null; if(ui.tpl===id) ui.tpl='tpl-inicial'; del('plantillas',id); break;
+    case 'newtpl': { const nid=uid('tpl'); put('plantillas',nid,{nombre:'Nueva plantilla',texto:'Hola {contacto}, le escribe {remitente}.\n\n{documentos}\n\nFecha límite: {fecha_limite}.'}); toast('Plantilla creada al final de la lista'); break; }
+    case 'delcat': { const cat=state.ajustes.catalogo.slice(); cat.splice(+t.dataset.i,1); put('config','ajustes',{...state.ajustes,catalogo:cat}); break; }
+  }
+});
+
+document.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.dataset.act==='sel'){ t.checked?ui.sel.add(t.dataset.id):ui.sel.delete(t.dataset.id); render(); }
+  else if(t.dataset.act==='registrar'){ ui.registrar=t.checked; }
+  else if(t.dataset.act==='rec'){
+    const s=state.solicitudes.find(x=>x.id===t.dataset.id); if(!s) return;
+    const docs=(s.docs||[]).map((d,i)=>i===+t.dataset.i?{...d,recibido:t.checked}:d);
+    put('solicitudes',s.id,{...strip(s),docs});
+    if(docs.every(d=>d.recibido)) toast('Expediente completo');
+  }
+  else if(t.id==='tplsel'){ ui.tpl=t.value; resetOpened(); render(); }
+  else if(t.id==='fecha'){ ui.fecha=t.value; resetOpened(); render(); }
+  else if(t.id==='periodo'){ ui.periodo=t.value; resetOpened(); render(); }
+  else if(t.id==='fperiodo'){ ui.fperiodo=t.value; render(); }
+  else if(t.id==='mailapp'){ put('config','ajustes',{...state.ajustes,correoApp:t.value}); toast('Correo: '+MAIL_APPS[t.value]); }
+});
+document.addEventListener('input', e=>{
+  if(e.target.id==='busq'){ ui.busq=e.target.value; const el=document.getElementById('clist'); if(el) el.innerHTML=clientRows(); }
+});
+
+document.addEventListener('submit', e=>{
+  const f=e.target.closest('form[data-form]'); if(!f) return; e.preventDefault();
+  const k=f.dataset.form, v=id=>(document.getElementById(id)?.value||'').trim();
+  if(k==='docextra'){ const d=v('docextra'); if(d){ ui.docs.add(d); resetOpened(); render(); } }
+  else if(k==='cliente'){
+    const rec={empresa:v('c-emp'),rfc:v('c-rfc').toUpperCase(),contacto:v('c-con'),telefono:v('c-tel'),correo:v('c-mail'),notas:v('c-not')};
+    if(!rec.empresa && !rec.contacto){ toast('Escribe al menos la empresa o el contacto.'); return; }
+    if(!rec.telefono && !rec.correo){ toast('Agrega un WhatsApp o un correo.'); return; }
+    if(rec.telefono && !phoneOk(rec.telefono)){ toast('Revisa el WhatsApp: deben ser 10 dígitos (o lada internacional completa).'); return; }
+    if(rec.correo && !emailOk(rec.correo)){ toast('Revisa el correo: parece incompleto.'); return; }
+    const id=ui.editCli||uid('c'); const prev=state.clientes.find(c=>c.id===id);
+    ui.editCli=null; put('clientes',id,{...(prev?strip(prev):{}),...rec,ejemplo:false,creado:prev?.creado||new Date().toISOString()});
+    toast(prev?'Cliente actualizado':'Cliente guardado');
+    ['c-emp','c-rfc','c-con','c-tel','c-mail','c-not'].forEach(i=>{const el=document.getElementById(i); if(el) el.value='';});
+  }
+  else if(k==='import'){
+    const lines=v('imp').split(/\n+/).map(l=>l.split(/\t|,|;/).map(x=>x.trim())).filter(p=>p.some(Boolean));
+    let n=0, bad=0;
+    (async()=>{ for(const p of lines){ const [empresa='',contacto='',telefono='',correo='']=p;
+      if(!phoneOk(telefono) && !emailOk(correo)){bad++;continue;}
+      await put('clientes',uid('c'),{empresa,contacto,telefono:phoneOk(telefono)?telefono:'',correo:emailOk(correo)?correo:'',notas:'',creado:new Date().toISOString()}); n++; }
+      document.getElementById('imp') && (document.getElementById('imp').value='');
+      toast(`${n} cliente${n===1?'':'s'} importado${n===1?'':'s'}`+(bad?` · ${bad} línea${bad>1?'s':''} sin teléfono ni correo válido`:''));
+    })();
+  }
+  else if(k==='tpl'){ const id=f.dataset.id; put('plantillas',id,{nombre:v('tn-'+id)||'Sin nombre',asunto:v('ts-'+id)||DEF_ASUNTO,texto:document.getElementById('tt-'+id).value}); toast('Plantilla guardada'); }
+  else if(k==='perfil'){
+    const g=v('p-gmail').toLowerCase();
+    if(g && !emailOk(g)){ toast('Revisa tu correo de Gmail: parece incompleto.'); return; }
+    const datos={remitente:v('p-firma'),gmail:g,email:currentEmail};
+    if(!db){ perfil=datos; render(); toast('Tus datos se guardaron'); return; }
+    db.collection('usuarios').doc(myId).set(datos).then(()=>toast('Tus datos se guardaron')).catch(handleErr);
+  }
+  else if(k==='mail'){
+    const m=v('mailnew').toLowerCase();
+    if(!emailOk(m)){ toast('Revisa el correo: parece incompleto.'); return; }
+    if(recepcion().some(x=>x.correo===m)){ toast('Ese correo ya está en la lista.'); return; }
+    put('config','ajustes',{...state.ajustes,recepcion:[...recepcion(),{correo:m,principal:!recepcion().length}]});
+    toast('Correo de recepción agregado');
+  }
+  else if(k==='remitente'){ put('config','ajustes',{...state.ajustes,remitente:v('remit')}); toast('Guardado'); }
+  else if(k==='cat'){ const d=v('catnew'); if(d && !state.ajustes.catalogo.includes(d)){ put('config','ajustes',{...state.ajustes,catalogo:[...state.ajustes.catalogo,d]}); } }
+});
+
+initFirebase();
+})();
+</script>
+
+</body>
+</html>
